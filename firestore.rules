@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Default-Deny master gate
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Strict User-Isolated Subcollections
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+
+      match /journal_entries/{entryId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /stocks/{ticker} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /transactions/{txId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}

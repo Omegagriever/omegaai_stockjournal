@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "User": {
+      "path": "users/{userId}",
+      "description": "User profile records",
+      "fields": {
+        "uid": { "type": "string", "required": true },
+        "email": { "type": "string", "required": false },
+        "displayName": { "type": "string", "required": false },
+        "photoURL": { "type": "string", "required": false },
+        "createdAt": { "type": "string", "required": true },
+        "updatedAt": { "type": "string", "required": true }
+      },
+      "roles": {
+        "read": ["owner"],
+        "write": ["owner"]
+      }
+    },
+    "JournalEntry": {
+      "path": "users/{userId}/journal_entries/{entryId}",
+      "description": "User multi-turn reflections, conversational history and AI summaries with embedded financial analysis",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "prompt": { "type": "string", "required": true },
+        "response": { "type": "string", "required": true },
+        "summary": { "type": "string", "required": false },
+        "stockContextUsed": { "type": "array", "required": false },
+        "timestamp": { "type": "string", "required": true }
+      },
+      "roles": {
+        "read": ["owner"],
+        "write": ["owner"]
+      }
+    },
+    "StockHolding": {
+      "path": "users/{userId}/stocks/{ticker}",
+      "description": "Aggregated dollar-weighted average cost and quantity for a user's stock asset",
+      "fields": {
+        "ticker": { "type": "string", "required": true },
+        "total_quantity": { "type": "number", "required": true },
+        "average_cost": { "type": "number", "required": true },
+        "total_invested": { "type": "number", "required": true },
+        "last_updated": { "type": "string", "required": true }
+      },
+      "roles": {
+        "read": ["owner"],
+        "write": ["owner"]
+      }
+    },
+    "Transaction": {
+      "path": "users/{userId}/transactions/{txId}",
+      "description": "Individual Buy/Sell audit transactions",
+      "fields": {
+        "id": { "type": "string", "required": true },
+        "ticker": { "type": "string", "required": true },
+        "type": { "type": "string", "required": true },
+        "quantity": { "type": "number", "required": true },
+        "price": { "type": "number", "required": true },
+        "timestamp": { "type": "string", "required": true },
+        "calculatedAvgCostAfter": { "type": "number", "required": false },
+        "notes": { "type": "string", "required": false }
+      },
+      "roles": {
+        "read": ["owner"],
+        "write": ["owner"]
+      }
+    }
+  }
+}
