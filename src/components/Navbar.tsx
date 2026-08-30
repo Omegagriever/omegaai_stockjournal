@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, TrendingUp, Calculator, ShieldCheck, LogOut, Sparkles, User as UserIcon } from 'lucide-react';
+import { BookOpen, TrendingUp, Calculator, LogOut, Sparkles, User as UserIcon, FileSpreadsheet } from 'lucide-react';
 import { UserProfile, StockHolding } from '../types';
 
 interface NavbarProps {
@@ -7,6 +7,7 @@ interface NavbarProps {
   activeTab: 'journal' | 'portfolio' | 'simulator' | 'security';
   setActiveTab: (tab: 'journal' | 'portfolio' | 'simulator' | 'security') => void;
   onLogout: () => void;
+  onOpenBackupModal: () => void;
   holdingsCount: number;
   entriesCount: number;
 }
@@ -16,6 +17,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
   onLogout,
+  onOpenBackupModal,
   holdingsCount,
   entriesCount,
 }) => {
@@ -31,15 +33,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-serif text-lg font-bold tracking-wide text-[#F5F5F5]">
-                  AEGIS
+                <span className="font-serif text-lg font-bold tracking-wider text-[#F5F5F5]">
+                  OMEGA
                 </span>
                 <span className="rounded border border-[#C4A77D]/30 bg-[#C4A77D]/10 px-1.5 py-0.5 text-[10px] font-mono font-medium text-[#C4A77D]">
-                  GEMINI 3.6
+                  JOURNEY
                 </span>
               </div>
               <p className="hidden text-xs text-[#888888] sm:block">
-                AI Financial Journal & Portfolio Ledger
+                Reflective Financial Journal & Portfolio Ledger
               </p>
             </div>
           </div>
@@ -94,25 +96,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Calculator className={`h-4 w-4 ${activeTab === 'simulator' ? 'text-[#C4A77D]' : 'text-[#888888]'}`} />
               <span>P&L Sim</span>
             </button>
-
-            <button
-              id="tab-security-btn"
-              onClick={() => setActiveTab('security')}
-              className={`hidden md:flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                activeTab === 'security'
-                  ? 'bg-[#1F1F1F] text-[#F5F5F5] border border-[#333333] shadow-xs'
-                  : 'text-[#A3A3A3] hover:bg-[#141414] hover:text-[#E5E5E5]'
-              }`}
-            >
-              <ShieldCheck className={`h-4 w-4 ${activeTab === 'security' ? 'text-[#C4A77D]' : 'text-[#888888]'}`} />
-              <span>Firestore Rules</span>
-            </button>
           </nav>
 
-          {/* User Profile & Sign Out */}
-          <div className="flex items-center gap-3">
+          {/* Right Action: Google Drive Backup + User Profile */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Google Sheets Backup Action Button */}
+            <button
+              id="google-backup-btn"
+              onClick={onOpenBackupModal}
+              title="Backup Portfolio & Journal to Google Sheets in Google Drive"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-colors cursor-pointer"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Drive Backup</span>
+            </button>
+
+            {/* User Profile & Sign Out */}
             {user && (
-              <div className="flex items-center gap-2.5 rounded-xl border border-[#262626] bg-[#141414] px-3 py-1.5">
+              <div className="flex items-center gap-2 rounded-xl border border-[#262626] bg-[#141414] px-2.5 py-1.5">
                 {user.photoURL ? (
                   <img
                     src={user.photoURL}
@@ -126,11 +127,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                 )}
                 <div className="hidden lg:block text-left">
-                  <p className="text-xs font-semibold text-[#E5E5E5] leading-tight truncate max-w-[120px]">
+                  <p className="text-xs font-semibold text-[#E5E5E5] leading-tight truncate max-w-[100px]">
                     {user.displayName || 'Investor'}
-                  </p>
-                  <p className="text-[10px] text-[#888888] font-mono truncate max-w-[120px]">
-                    {user.email || user.uid.substring(0, 8)}
                   </p>
                 </div>
                 <button
@@ -139,7 +137,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   title="Sign Out"
                   className="ml-1 rounded-lg p-1 text-[#888888] hover:bg-[#222222] hover:text-[#EF4444] transition-colors cursor-pointer"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}

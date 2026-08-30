@@ -13,13 +13,14 @@ import { AuthLanding } from './components/AuthLanding';
 import { JournalTab } from './components/JournalTab';
 import { StockPortfolioTab } from './components/StockPortfolioTab';
 import { SimulatorTab } from './components/SimulatorTab';
-import { FirestoreSecurityTab } from './components/FirestoreSecurityTab';
-import { Sparkles, ShieldCheck, Database, Layers } from 'lucide-react';
+import { GoogleSheetsBackupModal } from './components/GoogleSheetsBackupModal';
+import { Sparkles, ShieldCheck, Database, FileSpreadsheet } from 'lucide-react';
 
 export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [authLoading, setAuthLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'journal' | 'portfolio' | 'simulator' | 'security'>('journal');
+  const [isBackupModalOpen, setIsBackupModalOpen] = useState<boolean>(false);
   
   // Real-Time Firestore State
   const [stocks, setStocks] = useState<StockHolding[]>([]);
@@ -32,24 +33,33 @@ export default function App() {
 
   // Firebase Auth State Listener
   useEffect(() => {
+    // Safety fallback: Never stay stuck on loading screen longer than 3 seconds
+    const fallbackTimer = setTimeout(() => {
+      setAuthLoading(false);
+    }, 3000);
+
     const unsubscribe = subscribeAuthState((firebaseUser) => {
+      clearTimeout(fallbackTimer);
       if (firebaseUser) {
+        // 1. Immediately set the user profile and clear loading state
+        const initialProfile: UserProfile = {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName || 'Investor',
+          photoURL: firebaseUser.photoURL,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setUser(initialProfile);
+        setAuthLoading(false);
+
+        // 2. Perform background profile sync with Firestore
         syncUserProfile(firebaseUser)
           .then((profile) => {
             setUser(profile);
-            setAuthLoading(false);
           })
           .catch((err) => {
-            console.error('Failed to sync user profile:', err);
-            setUser({
-              uid: firebaseUser.uid,
-              email: firebaseUser.email,
-              displayName: firebaseUser.displayName || 'Investor',
-              photoURL: firebaseUser.photoURL,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-            });
-            setAuthLoading(false);
+            console.warn('Background user profile sync warning:', err);
           });
       } else {
         setUser(null);
@@ -60,7 +70,10 @@ export default function App() {
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(fallbackTimer);
+      unsubscribe();
+    };
   }, []);
 
   // Real-Time Subscriptions when User is Authenticated
@@ -95,8 +108,8 @@ export default function App() {
     }
   };
 
-  // Cross-Tab Handler: "Ask Gemini" from Portfolio Tab
-  const handleAskGeminiForTicker = (ticker: string, holding: StockHolding) => {
+  // Cross-Tab Handler: "Consult Journal" from Portfolio Tab
+  const handleAskJournalForTicker = (ticker: string, holding: StockHolding) => {
     setActivePromptQuery(
       `I'm reviewing my position in $${ticker}. I currently hold ${holding.total_quantity} shares at a dollar-weighted Average Cost of $${safeToFixed(holding.average_cost, 2)}. What are key catalysts, risk considerations, and how should I think about my exit strategy?`
     );
@@ -122,7 +135,7 @@ export default function App() {
           <Sparkles className="h-6 w-6" />
         </div>
         <p className="text-xs font-mono text-[#A3A3A3]">
-          Connecting to Firebase & Gemini 3.6...
+          Loading your financial journey...
         </p>
       </div>
     );
@@ -142,6 +155,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onLogout={handleLogout}
+        onOpenBackupModal={() => setIsBackupModalOpen(true)}
         holdingsCount={stocks.length}
         entriesCount={pastEntries.length}
       />
@@ -159,6 +173,7 @@ export default function App() {
             onClearActivePromptQuery={() => setActivePromptQuery('')}
             onOpenSimulatorForTicker={handleOpenSimulatorForTicker}
             onOpenPortfolioTab={() => setActiveTab('portfolio')}
+            onOpenBackupModal={() => setIsBackupModalOpen(true)}
           />
         )}
 
@@ -167,8 +182,9 @@ export default function App() {
             user={user}
             stocks={stocks}
             transactions={transactions}
-            onAskGeminiForTicker={handleAskGeminiForTicker}
+            onAskJournalForTicker={handleAskJournalForTicker}
             onOpenSimulatorForTicker={handleOpenSimulatorForTicker}
+            onOpenBackupModal={() => setIsBackupModalOpen(true)}
           />
         )}
 
@@ -181,31 +197,35 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'security' && (
-          <FirestoreSecurityTab
-            user={user}
-            stocks={stocks}
-            transactions={transactions}
-            pastEntries={pastEntries}
-          />
-        )}
-
       </main>
+
+      {/* Google Sheets Backup Modal */}
+      <GoogleSheetsBackupModal
+        isOpen={isBackupModalOpen}
+        onClose={() => setIsBackupModalOpen(false)}
+        user={user}
+        stocks={stocks}
+        transactions={transactions}
+        pastEntries={pastEntries}
+      />
 
       {/* Footer */}
       <footer className="border-t border-[#1F1F1F] bg-[#0E0E0E] py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#888888]">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-4 w-4 text-[#C4A77D]" />
-            <span>User Isolated Cloud Firestore • UID: <code className="text-[#C4A77D] font-mono">{user.uid.substring(0, 12)}...</code></span>
+            <span>OMEGA • Financial Journal & Portfolio Ledger</span>
           </div>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsBackupModalOpen(true)}
+              className="flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              <span>Google Drive Backup</span>
+            </button>
             <span className="flex items-center gap-1 text-[#A3A3A3]">
-              <Database className="h-3.5 w-3.5 text-[#C4A77D]" /> Real-time Subscriptions Active
-            </span>
-            <span className="text-[#333333]">•</span>
-            <span className="flex items-center gap-1 text-[#A3A3A3]">
-              <Sparkles className="h-3 w-3 text-[#C4A77D]" /> Gemini 3.6 Flash
+              <Database className="h-3.5 w-3.5 text-[#C4A77D]" /> Real-time Synchronization Active
             </span>
           </div>
         </div>

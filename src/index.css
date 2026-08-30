@@ -16,3 +16,61 @@
     color: #F5E8D3;
   }
 }
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 12mm 12mm 12mm;
+  }
+
+  html, body {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  /* Hide navigation, background chrome, interactive buttons */
+  .no-print,
+  nav,
+  header,
+  footer,
+  aside,
+  button:not(#printable-portfolio-report button) {
+    display: none !important;
+  }
+
+  /* Ensure printable report container is fully visible and styled */
+  #printable-portfolio-report {
+    display: block !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    width: 100% !important;
+    max-width: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure tables break neatly across pages */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  .page-break-before {
+    page-break-before: always;
+  }
+}

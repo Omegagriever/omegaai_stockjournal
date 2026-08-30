@@ -1,6 +1,7 @@
 {
-  "name": "Aegis Portfolio & AI Journal",
-  "description": "User-authenticated financial journaling and stock portfolio platform with dollar-weighted average cost intelligence powered by Gemini and Firestore.",
+  "name": "OMEGA",
+  "description": "Reflective Financial Journey & Dollar-Weighted Portfolio Intelligence",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
+

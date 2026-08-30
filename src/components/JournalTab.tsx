@@ -15,7 +15,8 @@ import {
   CheckCircle,
   BarChart3,
   Bookmark,
-  ArrowRight
+  ArrowRight,
+  FileSpreadsheet
 } from 'lucide-react';
 import { StockHolding, Transaction, JournalEntry, ChatMessage, UserProfile, DetectedTrade } from '../types';
 import { saveJournalEntry, deleteJournalEntry, addStockTransaction } from '../services/firestoreService';
@@ -30,6 +31,7 @@ interface JournalTabProps {
   onClearActivePromptQuery?: () => void;
   onOpenSimulatorForTicker?: (ticker: string) => void;
   onOpenPortfolioTab?: () => void;
+  onOpenBackupModal?: () => void;
 }
 
 export const JournalTab: React.FC<JournalTabProps> = ({
@@ -41,6 +43,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
   onClearActivePromptQuery,
   onOpenSimulatorForTicker,
   onOpenPortfolioTab,
+  onOpenBackupModal,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [currentInput, setCurrentInput] = useState<string>(activePromptQuery || '');
@@ -150,7 +153,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
       });
 
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to connect to Gemini.';
+      const msg = err instanceof Error ? err.message : 'Failed to generate financial analysis.';
       setError(msg);
     } finally {
       setLoading(false);
@@ -234,13 +237,25 @@ export const JournalTab: React.FC<JournalTabProps> = ({
                 Journal Archive
               </h3>
             </div>
-            <button
-              onClick={startNewChat}
-              className="inline-flex items-center gap-1 rounded-lg bg-[#C4A77D]/10 hover:bg-[#C4A77D]/20 border border-[#C4A77D]/30 px-2.5 py-1 text-xs font-semibold text-[#C4A77D] transition-colors cursor-pointer"
-            >
-              <PlusCircle className="h-3.5 w-3.5" />
-              New Entry
-            </button>
+            <div className="flex items-center gap-1.5">
+              {onOpenBackupModal && (
+                <button
+                  onClick={onOpenBackupModal}
+                  title="Backup entries to Google Sheets"
+                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-2 py-1 text-xs font-semibold text-emerald-400 transition-colors cursor-pointer"
+                >
+                  <FileSpreadsheet className="h-3.5 w-3.5" />
+                  <span className="hidden xl:inline">Drive Backup</span>
+                </button>
+              )}
+              <button
+                onClick={startNewChat}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#C4A77D]/10 hover:bg-[#C4A77D]/20 border border-[#C4A77D]/30 px-2.5 py-1 text-xs font-semibold text-[#C4A77D] transition-colors cursor-pointer"
+              >
+                <PlusCircle className="h-3.5 w-3.5" />
+                <span>New Entry</span>
+              </button>
+            </div>
           </div>
 
           {/* Search Filter */}
@@ -262,7 +277,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
                 <Bookmark className="h-6 w-6 mx-auto mb-2 text-[#444444]" />
                 <p>No journal entries found.</p>
                 <p className="mt-1 text-[11px] text-[#555555]">
-                  Start typing to reflect and converse with Gemini!
+                  Start typing to reflect and analyze your trades!
                 </p>
               </div>
             ) : (
@@ -339,7 +354,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-xs font-bold font-serif text-[#E5E5E5] flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5 text-[#C4A77D]" />
-              Active Firestore Stock Context
+              Active Stock Context
             </h4>
             <span className="text-[10px] font-mono text-[#888888]">
               {stocks.length} Assets
@@ -415,7 +430,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
               <div className="rounded-xl bg-[#C4A77D]/10 border border-[#C4A77D]/30 p-3.5 flex items-start gap-2.5">
                 <Sparkles className="h-4 w-4 text-[#C4A77D] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-xs font-semibold text-[#C4A77D] mb-0.5">Gemini Executive Summary</p>
+                  <p className="text-xs font-semibold text-[#C4A77D] mb-0.5">Executive Summary & Thesis</p>
                   <p className="text-xs text-[#E5E5E5] leading-relaxed">{selectedPastEntry.summary}</p>
                 </div>
               </div>
@@ -517,11 +532,11 @@ export const JournalTab: React.FC<JournalTabProps> = ({
                 </div>
                 <div>
                   <h3 className="font-serif text-sm font-bold text-[#F5F5F5]">
-                    Gemini 3.6 Financial Companion
+                    Financial Companion & Analysis
                   </h3>
                   <p className="text-[10px] text-[#888888] flex items-center gap-1.5">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Live Firestore context enabled
+                    Live portfolio context enabled
                   </p>
                 </div>
               </div>
@@ -567,10 +582,10 @@ export const JournalTab: React.FC<JournalTabProps> = ({
                   </div>
                   <div className="space-y-1 max-w-md mx-auto">
                     <h4 className="font-serif text-base font-bold text-[#F5F5F5]">
-                      Welcome to your AI Financial Journal
+                      Welcome to your Financial Journal
                     </h4>
                     <p className="text-xs text-[#888888] leading-relaxed">
-                      Write reflections on your trades, calculate dollar-weighted average costs, or simulate hypothetical profit and loss exits with Gemini.
+                      Write reflections on your trades, calculate dollar-weighted average costs, or simulate hypothetical profit and loss exits.
                     </p>
                   </div>
 
@@ -715,7 +730,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
               {loading && (
                 <div className="flex items-center gap-2 text-xs text-[#A3A3A3] bg-[#181818] rounded-xl p-3 border border-[#262626] max-w-sm">
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#C4A77D] border-t-transparent" />
-                  <span>Gemini 3.6 is calculating and analyzing portfolio records...</span>
+                  <span>Analyzing portfolio records and generating thesis...</span>
                 </div>
               )}
 
@@ -750,7 +765,7 @@ export const JournalTab: React.FC<JournalTabProps> = ({
               </div>
               <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#666666] font-mono px-1">
                 <span>Press Enter to send • Shift+Enter for newline</span>
-                <span>Auto-saved to Cloud Firestore</span>
+                <span>Auto-saved to Cloud Ledger</span>
               </div>
             </div>
 

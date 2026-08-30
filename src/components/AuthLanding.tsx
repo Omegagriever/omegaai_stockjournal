@@ -66,14 +66,14 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="font-serif text-lg font-bold tracking-wider text-[#F5F5F5]">AEGIS</h1>
-            <p className="text-xs text-[#888888]">AI Journal & Portfolio Intelligence</p>
+            <h1 className="font-serif text-lg font-bold tracking-wider text-[#F5F5F5]">OMEGA</h1>
+            <p className="text-xs text-[#888888]">Financial Journal & Portfolio Ledger</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <span className="flex items-center gap-1.5 rounded-full border border-[#262626] bg-[#121212] px-3 py-1 text-xs text-[#A3A3A3] font-mono">
             <ShieldCheck className="h-3.5 w-3.5 text-[#C4A77D]" />
-            Firestore RBAC Secured
+            Private & Isolated Ledger
           </span>
         </div>
       </header>
@@ -83,15 +83,15 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
         
         <div className="inline-flex items-center gap-2 rounded-full border border-[#C4A77D]/30 bg-[#C4A77D]/10 px-3.5 py-1 text-xs font-semibold text-[#C4A77D] mb-6">
           <Sparkles className="h-3.5 w-3.5" />
-          Powered by Gemini 3.6 Flash & Cloud Firestore
+          Reflective Financial Journey & Portfolio Intelligence
         </div>
 
         <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight text-[#F5F5F5] max-w-3xl leading-tight sm:leading-none">
-          Reflect on Markets. Track Cost Basis. Converse with Gemini.
+          Reflect on Markets. Track Cost Basis. Master Your Journey.
         </h2>
 
         <p className="mt-4 max-w-2xl text-base text-[#A3A3A3] leading-relaxed">
-          An authenticated financial workspace combining multi-turn AI journaling with real-time dollar-weighted average cost calculations and profit/loss simulations.
+          An intuitive financial companion combining multi-turn trade journaling with real-time dollar-weighted average cost calculations and profit/loss simulations.
         </p>
 
         {/* Error Alert */}
@@ -109,10 +109,10 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
         <div className="mt-8 w-full max-w-md rounded-2xl border border-[#222222] bg-[#111111] p-6 shadow-2xl space-y-4 text-left">
           <div className="space-y-1">
             <h3 className="font-serif text-base font-bold text-[#F5F5F5]">
-              Access Your Isolated Ledger
+              Access Your Personal Journey
             </h3>
             <p className="text-xs text-[#888888]">
-              All stock records and journal entries are secured to your unique UID via Firestore rules.
+              All stock records and reflections are securely isolated and persisted to your account.
             </p>
           </div>
 
@@ -164,7 +164,7 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
             ) : (
               <UserCheck className="h-4 w-4 text-[#C4A77D]" />
             )}
-            <span>Instant Demo Sign-In (Preview Mode)</span>
+            <span>Instant Demo Mode</span>
           </button>
         </div>
 
@@ -175,9 +175,9 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C4A77D]/10 text-[#C4A77D] border border-[#C4A77D]/20">
               <BookOpen className="h-4 w-4" />
             </div>
-            <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">AI Journal & Reflections</h4>
+            <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">Financial Journal & Notes</h4>
             <p className="text-xs text-[#888888] leading-relaxed">
-              Multi-turn reflections with Gemini 3.6 Flash. Brainstorm thesis, analyze discipline, and summarize past sessions.
+              Multi-turn trade reflections and thesis analysis. Log your emotions, strategy, and automatically sync trade executions.
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
             </div>
             <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">Dollar-Weighted AVR Cost</h4>
             <p className="text-xs text-[#888888] leading-relaxed">
-              Automatically updates cost basis and average price on every Buy/Sell transaction logged to Firestore.
+              Automatically calculates your real average cost basis and portfolio value across all Buy/Sell tranches.
             </p>
           </div>
 
@@ -195,9 +195,9 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C4A77D]/10 text-[#C4A77D] border border-[#C4A77D]/20">
               <Calculator className="h-4 w-4" />
             </div>
-            <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">Contextual Stock Math</h4>
+            <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">P&L Exit Simulations</h4>
             <p className="text-xs text-[#888888] leading-relaxed">
-              Ask Gemini "How much profit if I sell AAPL at $240?" to get instant numerical simulations based on your live holdings.
+              Simulate profit targets, risk-reward ratios, and exit scenarios linked directly to your current holdings.
             </p>
           </div>
 
@@ -207,7 +207,7 @@ export const AuthLanding: React.FC<AuthLandingProps> = ({ onAuthSuccess }) => {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-[#1A1A1A] py-6 text-center text-xs text-[#666666] font-mono">
-        <p>Aegis Portfolio & AI Journal • Cloud Firestore • Gemini 3.6 Flash</p>
+        <p>OMEGA • Financial Journal & Portfolio Ledger</p>
       </footer>
 
     </div>

@@ -107,3 +107,14 @@ export interface SimulationResult {
   percentageGain: number;
   analysis: string;
 }
+
+export interface GoogleBackupRecord {
+  id: string;
+  spreadsheetId: string;
+  spreadsheetUrl: string;
+  title: string;
+  timestamp: string;
+  stocksCount: number;
+  transactionsCount: number;
+  journalCount: number;
+}

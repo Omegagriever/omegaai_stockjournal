@@ -14,26 +14,31 @@ import {
   CheckCircle2, 
   AlertCircle,
   HelpCircle,
-  FolderPlus
+  FolderPlus,
+  FileSpreadsheet,
+  FileDown
 } from 'lucide-react';
 import { StockHolding, Transaction, TransactionType, UserProfile } from '../types';
 import { addStockTransaction, deleteStockHolding, deleteTransaction, seedSamplePortfolio } from '../services/firestoreService';
 import { safeToFixed, safeNumber } from '../lib/formatters';
+import { PortfolioReportModal } from './PortfolioReportModal';
 
 interface StockPortfolioTabProps {
   user: UserProfile;
   stocks: StockHolding[];
   transactions: Transaction[];
-  onAskGeminiForTicker: (ticker: string, holding: StockHolding) => void;
+  onAskJournalForTicker: (ticker: string, holding: StockHolding) => void;
   onOpenSimulatorForTicker: (ticker: string) => void;
+  onOpenBackupModal?: () => void;
 }
 
 export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
   user,
   stocks,
   transactions,
-  onAskGeminiForTicker,
+  onAskJournalForTicker,
   onOpenSimulatorForTicker,
+  onOpenBackupModal,
 }) => {
   // Form State
   const [ticker, setTicker] = useState<string>('');
@@ -46,6 +51,7 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeLedgerFilter, setActiveLedgerFilter] = useState<'ALL' | 'BUY' | 'SELL'>('ALL');
+  const [isReportModalOpen, setIsReportModalOpen] = useState<boolean>(false);
 
   // Compute total portfolio metrics
   const totalInvested = stocks.reduce((acc, s) => acc + (s.total_invested || (s.total_quantity * s.average_cost)), 0);
@@ -151,7 +157,45 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
   const popularTickers = ['AAPL', 'NVDA', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'META'];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      
+      {/* Portfolio Top Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#222222] pb-4">
+        <div>
+          <h2 className="text-xl font-bold font-serif text-[#F5F5F5] flex items-center gap-2">
+            <span>Portfolio & Average Cost Basis</span>
+            <span className="text-[11px] font-mono font-normal px-2.5 py-0.5 rounded-full bg-[#1C1C1C] border border-[#2A2A2A] text-[#C4A77D]">
+              {stocks.length} Holdings
+            </span>
+          </h2>
+          <p className="text-xs text-[#888888] mt-0.5">
+            Automated dollar-weighted cost averaging with real-time Firestore persistence
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            id="header-download-report-btn"
+            onClick={() => setIsReportModalOpen(true)}
+            title="Download printable PDF report of current portfolio holdings"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#C4A77D]/40 bg-[#C4A77D]/10 hover:bg-[#C4A77D]/20 text-[#C4A77D] px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+          >
+            <FileDown className="h-4 w-4" />
+            <span>Download Report</span>
+          </button>
+
+          {stocks.length > 0 && onOpenBackupModal && (
+            <button
+              onClick={onOpenBackupModal}
+              title="Sync to Google Drive Spreadsheet"
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3.5 py-2 text-xs font-semibold transition-all cursor-pointer shadow-xs active:scale-95"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              <span>Drive Backup</span>
+            </button>
+          )}
+        </div>
+      </div>
       
       {/* Portfolio Summary Metrics Banner */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -178,7 +222,7 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
             {stocks.length}
           </p>
           <p className="mt-1 text-[11px] text-[#888888]">
-            Unique stock tickers tracked in Firestore
+            Unique stock tickers tracked in your portfolio
           </p>
         </div>
 
@@ -413,7 +457,7 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
               ) : (
                 <TrendingUp className="h-4 w-4" />
               )}
-              <span>Commit Transaction to Firestore</span>
+              <span>Save Transaction to Ledger</span>
             </button>
 
           </form>
@@ -435,20 +479,43 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
                 </p>
               </div>
 
-              {stocks.length === 0 && (
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={handleSeedPortfolio}
-                  disabled={seeding}
+                  id="download-portfolio-report-btn"
+                  onClick={() => setIsReportModalOpen(true)}
+                  title="Download print-ready PDF statement of holdings & performance"
                   className="inline-flex items-center gap-1.5 rounded-xl border border-[#C4A77D]/40 bg-[#C4A77D]/10 px-3 py-1.5 text-xs font-semibold text-[#C4A77D] hover:bg-[#C4A77D]/20 transition-colors cursor-pointer"
                 >
-                  {seeding ? (
-                    <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#C4A77D] border-t-transparent" />
-                  ) : (
-                    <FolderPlus className="h-3.5 w-3.5" />
-                  )}
-                  Load Sample Portfolio
+                  <FileDown className="h-3.5 w-3.5" />
+                  <span>Download Report</span>
                 </button>
-              )}
+
+                {stocks.length > 0 && onOpenBackupModal && (
+                  <button
+                    onClick={onOpenBackupModal}
+                    title="Export holdings to Google Sheets"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-400 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+                  >
+                    <FileSpreadsheet className="h-3.5 w-3.5" />
+                    <span>Drive Backup</span>
+                  </button>
+                )}
+
+                {stocks.length === 0 && (
+                  <button
+                    onClick={handleSeedPortfolio}
+                    disabled={seeding}
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-[#C4A77D]/40 bg-[#C4A77D]/10 px-3 py-1.5 text-xs font-semibold text-[#C4A77D] hover:bg-[#C4A77D]/20 transition-colors cursor-pointer"
+                  >
+                    {seeding ? (
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#C4A77D] border-t-transparent" />
+                    ) : (
+                      <FolderPlus className="h-3.5 w-3.5" />
+                    )}
+                    Load Sample Portfolio
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Holdings Table */}
@@ -515,14 +582,14 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
                         <td className="py-3 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             
-                            {/* Ask Gemini Button */}
+                            {/* Consult Journal Button */}
                             <button
-                              onClick={() => onAskGeminiForTicker(s.ticker, s)}
-                              title="Ask Gemini about this holding"
+                              onClick={() => onAskJournalForTicker(s.ticker, s)}
+                              title="Reflect in Journal about this holding"
                               className="inline-flex items-center gap-1 rounded-lg border border-[#2A2A2A] bg-[#161616] px-2 py-1 text-[11px] font-semibold text-[#C4A77D] hover:bg-[#222222] transition-colors cursor-pointer"
                             >
                               <Sparkles className="h-3 w-3" />
-                              <span className="hidden sm:inline">Ask AI</span>
+                              <span className="hidden sm:inline">Journal</span>
                             </button>
 
                             {/* P&L Simulator Button */}
@@ -637,6 +704,15 @@ export const StockPortfolioTab: React.FC<StockPortfolioTabProps> = ({
         </div>
 
       </div>
+
+      {/* Printable / PDF Portfolio Report Modal */}
+      <PortfolioReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        user={user}
+        stocks={stocks}
+        transactions={transactions}
+      />
 
     </div>
   );

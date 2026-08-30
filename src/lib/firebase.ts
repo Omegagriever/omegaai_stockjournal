@@ -16,26 +16,69 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Auth
 export const auth = getAuth(app);
+
+export const WORKSPACE_SCOPES = [
+  'https://www.googleapis.com/auth/spreadsheets',
+  'https://www.googleapis.com/auth/drive.file'
+];
+
+// Standard Google Auth Provider for fast, reliable login
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
   prompt: 'select_account'
 });
 
+// Dedicated Workspace Provider for Sheets & Drive Exports
+export const workspaceProvider = new GoogleAuthProvider();
+WORKSPACE_SCOPES.forEach(scope => workspaceProvider.addScope(scope));
+workspaceProvider.setCustomParameters({
+  prompt: 'consent'
+});
+
+// In-Memory Cached Access Token for Google Workspace (Sheets / Drive APIs)
+let cachedGoogleAccessToken: string | null = null;
+
+export const setCachedGoogleAccessToken = (token: string | null) => {
+  cachedGoogleAccessToken = token;
+};
+
+export const getCachedGoogleAccessToken = (): string | null => {
+  return cachedGoogleAccessToken;
+};
+
 // Initialize Firestore with custom databaseId if configured
-export const db: Firestore = firebaseConfig.firestoreDatabaseId && firebaseConfig.firestoreDatabaseId !== '(default)'
-  ? getFirestore(app, firebaseConfig.firestoreDatabaseId)
+const configWithDb = firebaseConfig as { firestoreDatabaseId?: string };
+export const db: Firestore = configWithDb.firestoreDatabaseId && configWithDb.firestoreDatabaseId !== '(default)'
+  ? getFirestore(app, configWithDb.firestoreDatabaseId)
   : getFirestore(app);
 
 // Auth Helpers
-export const signInWithGoogle = async (): Promise<User> => {
+export const signInWithGoogle = async (): Promise<{ user: User; accessToken: string | null }> => {
   try {
     localStorage.removeItem('aegis_guest_session');
     const result = await signInWithPopup(auth, googleProvider);
-    return result.user;
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (credential?.accessToken) {
+      cachedGoogleAccessToken = credential.accessToken;
+    }
+    return { user: result.user, accessToken: cachedGoogleAccessToken };
   } catch (error: unknown) {
     console.error('Google Sign-In failed or popup blocked:', error);
     throw error;
   }
+};
+
+export const requestGoogleWorkspaceToken = async (): Promise<string> => {
+  if (cachedGoogleAccessToken) {
+    return cachedGoogleAccessToken;
+  }
+  const result = await signInWithPopup(auth, workspaceProvider);
+  const credential = GoogleAuthProvider.credentialFromResult(result);
+  if (!credential?.accessToken) {
+    throw new Error('Google Workspace authorization did not return an access token. Please grant Google Sheets & Drive permissions.');
+  }
+  cachedGoogleAccessToken = credential.accessToken;
+  return cachedGoogleAccessToken;
 };
 
 export interface GuestUser {

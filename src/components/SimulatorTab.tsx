@@ -130,7 +130,7 @@ What is your risk/reward critique and should I scale out in tranches?`;
               </h2>
             </div>
             <p className="text-xs text-[#A3A3A3] max-w-3xl">
-              Model profit scenarios against your real Firestore dollar-weighted average costs. Adjust target exit prices and let Gemini 3.6 evaluate risk-reward ratios.
+              Model profit scenarios against your dollar-weighted average costs. Adjust target exit prices and evaluate risk-reward ratios.
             </p>
           </div>
           
@@ -193,7 +193,7 @@ What is your risk/reward critique and should I scale out in tranches?`;
               <label className="text-xs font-semibold text-[#A3A3A3]">
                 Dollar-Weighted Avg Cost Basis ($)
               </label>
-              <span className="text-[10px] font-mono text-[#C4A77D]">From Firestore</span>
+              <span className="text-[10px] font-mono text-[#C4A77D]">Live Ledger</span>
             </div>
             <input
               type="number"
@@ -271,7 +271,7 @@ What is your risk/reward critique and should I scale out in tranches?`;
             ) : (
               <Sparkles className="h-4 w-4 text-[#C4A77D]" />
             )}
-            <span>Generate Gemini 3.6 Trade Assessment</span>
+            <span>Generate Trade Assessment</span>
           </button>
 
         </div>
@@ -358,7 +358,7 @@ What is your risk/reward critique and should I scale out in tranches?`;
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-[#C4A77D]" />
                 <h4 className="font-serif text-sm font-bold text-[#F5F5F5]">
-                  Gemini Quantitative Assessment
+                  Quantitative Trade Assessment
                 </h4>
               </div>
               <div className="prose prose-invert max-w-none text-xs text-[#D4D4D4] whitespace-pre-wrap leading-relaxed">

@@ -69,7 +69,7 @@ function setGuestJournal(entries: JournalEntry[]) {
 }
 
 /**
- * Sync user profile to Firestore or Local Storage
+ * Sync user profile to Firestore or Local Storage with timeout protection
  */
 export async function syncUserProfile(user: { uid: string; email: string | null; displayName: string | null; photoURL: string | null }): Promise<UserProfile> {
   const now = new Date().toISOString();
@@ -90,40 +90,47 @@ export async function syncUserProfile(user: { uid: string; email: string | null;
     return guestProfile;
   }
 
+  const defaultProfile: UserProfile = {
+    uid: user.uid,
+    email: user.email,
+    displayName: user.displayName || 'Investor',
+    photoURL: user.photoURL,
+    createdAt: now,
+    updatedAt: now
+  };
+
   try {
-    const userRef = doc(db, 'users', user.uid);
-    const userDoc = await getDoc(userRef);
-    let profile: UserProfile;
-    
-    if (!userDoc.exists()) {
-      profile = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || 'Investor',
-        photoURL: user.photoURL,
-        createdAt: now,
-        updatedAt: now
-      };
-      await setDoc(userRef, profile);
-    } else {
-      profile = {
-        ...userDoc.data() as UserProfile,
-        updatedAt: now
-      };
-      await setDoc(userRef, { updatedAt: now }, { merge: true });
-    }
-    
-    return profile;
+    const fetchWithTimeout = new Promise<UserProfile>(async (resolve, reject) => {
+      const timer = setTimeout(() => resolve(defaultProfile), 2500);
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userRef);
+        clearTimeout(timer);
+        
+        if (!userDoc.exists()) {
+          await setDoc(userRef, defaultProfile);
+          resolve(defaultProfile);
+        } else {
+          const profile: UserProfile = {
+            ...userDoc.data() as UserProfile,
+            displayName: user.displayName || (userDoc.data() as UserProfile).displayName || 'Investor',
+            photoURL: user.photoURL || (userDoc.data() as UserProfile).photoURL || null,
+            updatedAt: now
+          };
+          // Asynchronously update last active timestamp
+          setDoc(userRef, { updatedAt: now }, { merge: true }).catch(() => {});
+          resolve(profile);
+        }
+      } catch (e) {
+        clearTimeout(timer);
+        reject(e);
+      }
+    });
+
+    return await fetchWithTimeout;
   } catch (err) {
-    console.warn('Sync user profile Firestore fallback:', err);
-    return {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName || 'Investor',
-      photoURL: user.photoURL,
-      createdAt: now,
-      updatedAt: now
-    };
+    console.warn('Sync user profile fallback:', err);
+    return defaultProfile;
   }
 }
 
